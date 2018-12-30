@@ -40,7 +40,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun setupCamera() {
-        arSession = PixscapeApp.sharedInstance.scapeClient.arSession!!.withArFragment(sceneform_fragment as ArFragment)
+        arSession = PixscapeApp.sharedInstance.scapeClient.arSession?.withArFragment(sceneform_fragment as ArFragment)
         arSession?.isDebugMode = false
         arSession?.isPlaneDetection = true
         arSession?.isLightEstimation = true
@@ -75,6 +75,12 @@ class MainActivity : FragmentActivity() {
         geoSession?.startFetch(
                 sessionStarted = {
                     Log.d("PXMainActivity", "Session started")
+                },
+                positionRawEstimated = {
+
+                },
+                positionLocked = {
+
                 },
                 sessionError = {
                     Log.d("PXMainActivity", "Session error ${it.errorMessage}")
