@@ -63,7 +63,7 @@ class MainActivity : FragmentActivity() {
                     Log.d("PXMainActivity", "Retrieving GPS LocationCoordinates: $coordinates")
                 },
                 positionLocked = { details ->
-                    val coordinates = "${details.lockedCoordinates.latitude} ${details.lockedCoordinates.longitude} ${details.lockedCoordinates.altitude}"
+                    val coordinates = "${details.lockedCoordinates.latitude} ${details.lockedCoordinates.longitude}"
                     Log.d("PXMainActivity", "Retrieving Scape GeoCoordinates: $coordinates")
                 },
                 sessionError = { details ->
