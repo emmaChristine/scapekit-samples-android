@@ -1,4 +1,4 @@
-package com.scape.pixscape
+package com.scape.scapekit
 
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
@@ -40,14 +40,14 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun setupCamera() {
-        arSession = PixscapeApp.sharedInstance.scapeClient.arSession?.withArFragment(sceneform_fragment as ArFragment)
+        arSession = ArSessionApp.sharedInstance.scapeClient.arSession?.withArFragment(sceneform_fragment as ArFragment)
         arSession?.isDebugMode = false
         arSession?.isPlaneDetection = true
         arSession?.isLightEstimation = true
     }
 
     private fun setupGeo() {
-        geoSession = PixscapeApp.sharedInstance.scapeClient.geoSession
+        geoSession = ArSessionApp.sharedInstance.scapeClient.geoSession
     }
 
     private fun bindings() {
