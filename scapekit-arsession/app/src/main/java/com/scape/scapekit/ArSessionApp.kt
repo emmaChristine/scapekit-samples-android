@@ -1,17 +1,18 @@
-package com.scape.pixscape
+package com.scape.scapekit
 
 import android.app.Application
 import android.util.Log
+import com.scape.scapekit.BuildConfig
 import com.scape.scapekit.Scape
 import com.scape.scapekit.ScapeClient
 
-class PixscapeApp : Application() {
+class ArSessionApp : Application() {
 
     companion object {
-        private const val TAG = "PixscapeApp"
+        private const val TAG = "ArSessionApp"
 
-        private var mSharedInstance: PixscapeApp? = null
-        var sharedInstance: PixscapeApp
+        private var mSharedInstance: ArSessionApp? = null
+        var sharedInstance: ArSessionApp
             get() = mSharedInstance!!
             private set(value) {
                 mSharedInstance = value
