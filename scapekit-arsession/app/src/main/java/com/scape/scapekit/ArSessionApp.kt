@@ -2,14 +2,16 @@ package com.scape.scapekit
 
 import android.app.Application
 import android.util.Log
-import com.scape.scapekit.BuildConfig
-import com.scape.scapekit.Scape
-import com.scape.scapekit.ScapeClient
 
+/**
+ * Basic Application class that demonstrates the initialisation of the ScapeClient.
+ *
+ * ScapeClient entry point is acquired with debugSupport and ArSupport enabled and with our own Api Key.
+ */
 class ArSessionApp : Application() {
 
     companion object {
-        private const val TAG = "ArSessionApp"
+        val TAG = ArSessionApp::class.simpleName
 
         private var mSharedInstance: ArSessionApp? = null
         var sharedInstance: ArSessionApp
