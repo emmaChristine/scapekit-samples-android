@@ -7,6 +7,7 @@ import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
 import com.scape.scapekit.helper.PermissionHelper
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 /**
  * Activity that demonstrates the use of ScapeKit.
@@ -41,20 +42,10 @@ class MainActivity : FragmentActivity() {
      */
     fun checkPermissions() {
         val deniedPermissions = PermissionHelper.checkPermissions(this)
-        if (deniedPermissions != PermissionHelper.RequestResult.OK)
-            displayToast("Denied Permissions: $deniedPermissions")
+        if (!deniedPermissions.isEmpty())
+            displayToast("Denied Permissions: ${Arrays.toString(deniedPermissions)}")
 
-        when (deniedPermissions) {
-            PermissionHelper.RequestResult.CAMERA_DENIED -> PermissionHelper.requestPermission(this, PermissionHelper.Request.CAMERA)
-
-            PermissionHelper.RequestResult.LOCATION_DENIED -> PermissionHelper.requestPermission(this, PermissionHelper.Request.LOCATION)
-
-            PermissionHelper.RequestResult.STORAGE_DENIED  -> PermissionHelper.requestPermission(this, PermissionHelper.Request.STORAGE)
-
-            PermissionHelper.RequestResult.CAMERA_AND_LOCATION_DENIED -> PermissionHelper.requestPermission(this, PermissionHelper.Request.CAMERA_AND_LOCATION)
-
-            PermissionHelper.RequestResult.CAMERA_LOCATION_AND_STORAGE_DENIED -> PermissionHelper.requestPermission(this, PermissionHelper.Request.CAMERA_LOCATION_AND_STORAGE)
-        }
+        PermissionHelper.requestPermissions(this, deniedPermissions)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
