@@ -43,7 +43,7 @@ dependencies {
     // UI
     implementation 'com.android.support:appcompat-v7:28.0.0'
     // LOCATION
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
     // SceneForm
-    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.5.1'
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.6.0'
 }

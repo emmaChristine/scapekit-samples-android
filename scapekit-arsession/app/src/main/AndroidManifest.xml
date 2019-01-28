@@ -2,13 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.scape.scapekit">
 
-    <uses-sdk android:minSdkVersion="24" />
-
     <!--For play store-->
     <uses-feature android:name="android.hardware.camera" android:required="true"/>
     <uses-feature android:name="android.hardware.camera.ar" android:required="true" />
 
-    <!--permissions-->
+    <!--&lt;!&ndash;permissions&ndash;&gt;-->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -20,7 +18,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
-    <!--Allow Toast on Nougat ++ -->
+    <!--&lt;!&ndash;Allow Toast on Nougat ++ &ndash;&gt;-->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application

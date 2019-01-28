@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.activity_main.*
  * Activity that demonstrates the use of ScapeKit.
  *
  * In order to display the AR preview we are grabbing an ArSession with `ArSession.withArFragment(sceneform_fragment)`.
- *
  * On `localize_button` button press we attempt to retrieve the current geoposition(Position and Orientation) via `ScapeSession.getCurrentGeoPose`
  * with `GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE` flag to ensure a very precise localization.
  *
