@@ -37,7 +37,7 @@ dependencies {
         }
     }
     // SCAPEKIT
-    implementation 'com.scape:scapekit:0.1.8@aar'
+    implementation 'com.scape:scapekit:0.2.0@aar'
     // KOTLIN
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     // UI
