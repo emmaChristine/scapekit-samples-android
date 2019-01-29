@@ -5,53 +5,30 @@ import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
-import com.scape.scapekit.helper.PermissionHelper
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 /**
  * Activity that demonstrates the use of ScapeKit.
  *
- * The Activity requests permissions required by ScapeKit in case they were not granted previously.
- *
- * In order to display the AR preview we are grabbing an ArSession with ArSession.withArFragment(sceneform_fragment).
- *
- * Upon activity resume ArSession starts tracking and we can then retrieve the current geoposition via geoSession.getCurrentGeoPosition.
+ * In order to display the AR preview we are grabbing an ArSession with `ArSession.withArFragment(sceneform_fragment)`.
+ * On `localize_button` button press we attempt to retrieve the current geoposition(Position and Orientation) via `ScapeSession.getCurrentGeoPose`
+ * with `GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE` flag to ensure a very precise localization.
  *
  */
-class MainActivity : FragmentActivity() {
-    val TAG = MainActivity::class.simpleName
+class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver {
+    val TAG = MainActivity::class.java.simpleName
 
     private var arSession: ArSession? = null
-    private var geoSession: GeoSession? = null
+    private var scapeSession: ScapeSession? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        checkPermissions()
-
         setupCamera()
         setupGeo()
 
         bindings()
-    }
-
-    /**
-     * Check if permissions required by ScapeKit have been granted and prompt the user to grant the ones that haven't been granted yet.
-     */
-    fun checkPermissions() {
-        val deniedPermissions = PermissionHelper.checkPermissions(this)
-        if (!deniedPermissions.isEmpty())
-            displayToast("Denied Permissions: ${Arrays.toString(deniedPermissions)}")
-
-        PermissionHelper.requestPermissions(this, deniedPermissions)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        PermissionHelper.processResult(this, requestCode, permissions, grantResults)
     }
 
     override fun onResume() {
@@ -71,36 +48,41 @@ class MainActivity : FragmentActivity() {
 
         super.onDestroy()
     }
-    /**
-     * Example on how to start continuous geoposition fetching.
-     */
-    fun startFetch() {
-        geoSession?.startFetch(
-                sessionStarted = {
-                    Log.d(TAG, "Session started")
-                },
-                positionRawEstimated = {
 
-                },
-                positionLocked = {
-
-                },
-                sessionError = {
-                    Log.d(TAG, "Session error ${it.errorMessage}")
-                })
+    override fun onScapeSessionClosed(p0: ScapeSession?, details: ScapeSessionDetails) {
+        Log.d(TAG, "ScapeSessionClosed: $details")
     }
 
-    /**
-     * Example on how to stop continuous geoposition fetching.
-     */
-    fun stopFetch() {
-        geoSession?.stopFetch(
-                sessionClosed = {
-                    Log.d(TAG, "Session stopped")
-                },
-                sessionError = {
-                    Log.d(TAG, "Session error ${it.errorMessage}")
-                })
+    override fun onGeoPoseEstimated(p0: ScapeSession?, details: ScapeSessionDetails) {
+        Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details.mGeoPose}")
+    }
+
+    override fun onScapeSessionStarted(p0: ScapeSession?, details: ScapeSessionDetails) {
+        Log.d(TAG, "ScapeSessionStarted: $details")
+    }
+
+    override fun onScapeSessionError(p0: ScapeSession?, details: ScapeSessionDetails) {
+        Log.d(TAG, "Could not retrieve geo coordinates: ${details.errorMessage}")
+    }
+
+    override fun onTrackingStateUpdated(p0: ArSession?, details: ArTrackingState) {
+        Log.d(TAG, "onTrackingStateUpdated: $details")
+    }
+
+    override fun onPlaneDetected(p0: ArSession?, details: ArPlane) {
+        Log.d(TAG, "onPlaneDetected: $details")
+    }
+
+    override fun onFrameUpdated(p0: ArSession?, details: ArFrame) {
+        Log.d(TAG, "onFrameUpdated: $details")
+    }
+
+    override fun onPlaneUpdated(p0: ArSession?, details: ArPlane) {
+        Log.d(TAG, "onPlaneUpdated: $details")
+    }
+
+    override fun onPlaneRemoved(p0: ArSession?, details: ArPlane) {
+        Log.d(TAG, "onPlaneRemoved: $details")
     }
 
     private fun setupCamera() {
@@ -108,10 +90,12 @@ class MainActivity : FragmentActivity() {
         arSession?.isDebugMode = false
         arSession?.isPlaneDetection = true
         arSession?.isLightEstimation = true
+        arSession?.arSessionObserver = this
     }
 
     private fun setupGeo() {
-        geoSession = ArSessionApp.sharedInstance.scapeClient.geoSession
+        scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
+        scapeSession?.scapeSessionObserver = this
     }
 
     private fun bindings() {
@@ -121,17 +105,26 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun getCurrentPositionAsync() {
-        geoSession?.getCurrentGeoPosition(
-                positionRawEstimated = { details ->
-                    val coordinates = "${details.rawLocation.coordinates.latitude} ${details.rawLocation.coordinates.longitude} ${details.rawLocation.coordinates.altitude}"
-                    Log.d(TAG, "Retrieving GPS LocationCoordinates: $coordinates")
+        scapeSession?.getCurrentGeoPose(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE)
+    }
+
+    /**
+     * Example on how to start continuous geoposition fetching using Scape Vision Engine.
+     */
+    private fun startFetch() {
+        scapeSession?.startFetch(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE)
+    }
+
+    /**
+     * Example on how to stop continuous geoposition fetching.
+     */
+    private fun stopFetch() {
+        scapeSession?.stopFetch(
+                sessionClosed = {
+                    Log.d(TAG, "Session stopped")
                 },
-                positionLocked = { details ->
-                    val coordinates = "${details.lockedCoordinates.latitude} ${details.lockedCoordinates.longitude}"
-                    Log.d(TAG, "Retrieving Scape GeoCoordinates: $coordinates")
-                },
-                sessionError = { details ->
-                    Log.e(TAG, "Could not retrieve geo coordinates: ${details.errorMessage}")
+                sessionError = {
+                    Log.d(TAG, "Session error ${it.errorMessage}")
                 })
     }
 
@@ -143,4 +136,5 @@ class MainActivity : FragmentActivity() {
     private fun displayToast(message: String) {
         runOnUiThread { Toast.makeText(applicationContext, "$TAG:$message", Toast.LENGTH_LONG).show() }
     }
+
 }

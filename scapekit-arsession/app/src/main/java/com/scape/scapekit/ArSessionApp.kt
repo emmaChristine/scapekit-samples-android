@@ -11,7 +11,7 @@ import android.util.Log
 class ArSessionApp : Application() {
 
     companion object {
-        val TAG = ArSessionApp::class.simpleName
+        val TAG = ArSessionApp::class.java.simpleName
 
         private var mSharedInstance: ArSessionApp? = null
         var sharedInstance: ArSessionApp
