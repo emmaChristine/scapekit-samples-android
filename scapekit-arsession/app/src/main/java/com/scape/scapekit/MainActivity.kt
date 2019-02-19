@@ -5,9 +5,8 @@ import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
-import com.scape.scapekit.utils.CoordinatesUtils
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.ArrayList
+import java.util.*
 
 /**
  * Activity that demonstrates the use of ScapeKit.
@@ -38,12 +37,16 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         super.onResume()
 
         arSession?.startTracking()
+
+        startFetch()
     }
 
     override fun onPause() {
         super.onPause()
 
         arSession?.stopTracking()
+
+        stopFetch()
     }
 
     override fun onDestroy() {
@@ -62,10 +65,12 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
 
     override fun onScapeMeasurementsUpdated(p0: ScapeSession?, p1: ScapeMeasurements?) {
         Log.d(TAG, "onScapeMeasurementsUpdated: $p1")
+
     }
 
     override fun onDeviceLocationMeasurementsUpdated(p0: ScapeSession?, details: LocationMeasurements?) {
         Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details?.coordinates}")
+
     }
 
     override fun onCameraTransformUpdated(p0: ScapeSession?, p1: ArrayList<Double>?) {
@@ -101,6 +106,8 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
 
     private fun setupGeo() {
         scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
+
+        startFetch()
     }
 
     private fun bindings() {
