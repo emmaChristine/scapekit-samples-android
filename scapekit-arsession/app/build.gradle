@@ -19,7 +19,7 @@ android {
     }
 
     buildTypes.each {
-        it.buildConfigField 'String', 'SCAPEKIT_API_KEY', ScapeKitApiKey
+        it.buildConfigField 'String', 'SCAPEKIT_API_KEY', "\"${ScapeKitApiKey}\""
     }
 
     compileOptions {
