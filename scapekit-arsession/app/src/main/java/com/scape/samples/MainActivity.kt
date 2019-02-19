@@ -1,4 +1,4 @@
-package com.scape.scapekit
+package com.scape.samples
 
 import android.app.Activity
 import android.content.Intent
@@ -9,6 +9,8 @@ import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
+import com.scape.scapekit.*
+import com.scape.scapekit.BuildConfig
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -130,8 +132,6 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
 
     private fun setupGeo() {
         scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
-
-        startFetch()
     }
 
     private fun bindings() {
