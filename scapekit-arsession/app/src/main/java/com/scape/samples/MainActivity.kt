@@ -1,23 +1,32 @@
-package com.scape.scapekit
+package com.scape.samples
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
+import com.scape.scapekit.*
+import com.scape.scapekit.BuildConfig
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 /**
  * Activity that demonstrates the use of ScapeKit.
  *
  * In order to display the AR preview we are grabbing an ArSession with `ArSession.withArFragment(sceneform_fragment)`.
- * On `localize_button` button press we attempt to retrieve the current geoposition(Position and Orientation) via `ScapeSession.getCurrentGeoPose`
+ * On `localize_button` button press we attempt to retrieve the current geo-position(Position and Orientation) via `ScapeSession.getMeasurements`
  * with `GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE` flag to ensure a very precise localization.
  *
  */
 class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver {
+
     val TAG = MainActivity::class.java.simpleName
 
+    private val REQUEST_OVERLAY = 11
     private var arSession: ArSession? = null
     private var scapeSession: ScapeSession? = null
 
@@ -25,10 +34,35 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        enableOverlay()
+
         setupCamera()
         setupGeo()
 
         bindings()
+    }
+
+    // Allow debug logs can be displayed on an overlay view
+    fun enableOverlay() {
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:${BuildConfig.APPLICATION_ID}"))
+            startActivityForResult(intent, REQUEST_OVERLAY)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == REQUEST_OVERLAY
+                // Setting screen does not have Ok button, thus result code is always RESULT_CANCELED
+                && resultCode == Activity.RESULT_CANCELED
+                && Settings.canDrawOverlays(this)) {
+            displayToast("Permission granted, debug logs wil be displayed after the next app launch")
+        } else {
+            displayToast("Please grant a permission to see debug logs on overlay")
+            finish()
+        }
+
     }
 
     override fun onResume() {
@@ -49,20 +83,23 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         super.onDestroy()
     }
 
-    override fun onScapeSessionClosed(p0: ScapeSession?, details: ScapeSessionDetails) {
-        Log.d(TAG, "ScapeSessionClosed: $details")
+    override fun onScapeSessionError(p0: ScapeSession?, p1: ScapeSessionState, p2: String) {
+        Log.d(TAG, "Could not retrieve geo coordinates: $p2")
     }
 
-    override fun onGeoPoseEstimated(p0: ScapeSession?, details: ScapeSessionDetails) {
-        Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details.mGeoPose}")
+    override fun onDeviceMotionMeasurementsUpdated(p0: ScapeSession?, p1: MotionMeasurements?) {
+        Log.d(TAG, "onDeviceMotionMeasurementsUpdated: $p1")
     }
 
-    override fun onScapeSessionStarted(p0: ScapeSession?, details: ScapeSessionDetails) {
-        Log.d(TAG, "ScapeSessionStarted: $details")
+    override fun onScapeMeasurementsUpdated(p0: ScapeSession?, p1: ScapeMeasurements?) {
+        Log.d(TAG, "onScapeMeasurementsUpdated: $p1")
     }
 
-    override fun onScapeSessionError(p0: ScapeSession?, details: ScapeSessionDetails) {
-        Log.d(TAG, "Could not retrieve geo coordinates: ${details.errorMessage}")
+    override fun onDeviceLocationMeasurementsUpdated(p0: ScapeSession?, details: LocationMeasurements?) {
+        Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details?.coordinates}")
+    }
+
+    override fun onCameraTransformUpdated(p0: ScapeSession?, p1: ArrayList<Double>?) {
     }
 
     override fun onTrackingStateUpdated(p0: ArSession?, details: ArTrackingState) {
@@ -95,7 +132,6 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
 
     private fun setupGeo() {
         scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
-        scapeSession?.scapeSessionObserver = this
     }
 
     private fun bindings() {
@@ -105,27 +141,21 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun getCurrentPositionAsync() {
-        scapeSession?.getCurrentGeoPose(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE)
+        scapeSession?.getMeasurements(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE, this)
     }
 
     /**
      * Example on how to start continuous geoposition fetching using Scape Vision Engine.
      */
     private fun startFetch() {
-        scapeSession?.startFetch(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE)
+        scapeSession?.startFetch(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE, this)
     }
 
     /**
      * Example on how to stop continuous geoposition fetching.
      */
     private fun stopFetch() {
-        scapeSession?.stopFetch(
-                sessionClosed = {
-                    Log.d(TAG, "Session stopped")
-                },
-                sessionError = {
-                    Log.d(TAG, "Session error ${it.errorMessage}")
-                })
+        scapeSession?.stopFetch()
     }
 
     /**
