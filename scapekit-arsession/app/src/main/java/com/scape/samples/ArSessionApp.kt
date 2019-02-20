@@ -1,7 +1,9 @@
-package com.scape.scapekit
+package com.scape.samples
 
 import android.app.Application
 import android.util.Log
+import com.scape.scapekit.Scape
+import com.scape.scapekit.ScapeClient
 
 /**
  * Basic Application class that demonstrates the initialisation of the ScapeClient.

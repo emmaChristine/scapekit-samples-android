@@ -9,7 +9,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
-        versionName "1.0"
+        versionName "3.0"
     }
     buildTypes {
         release {
@@ -37,7 +37,7 @@ dependencies {
         }
     }
     // SCAPEKIT
-    implementation 'com.scape:scapekit:0.2.0@aar'
+    implementation 'com.scape:scapekit:0.3.0@aar'
     // KOTLIN
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     // UI
