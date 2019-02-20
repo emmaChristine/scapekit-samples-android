@@ -38,7 +38,6 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         setContentView(R.layout.activity_main)
 
         checkAndRequestPermissions()
-        //enableOverlay()
 
         setupCamera()
         setupGeo()
@@ -63,18 +62,13 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
                 && Settings.canDrawOverlays(this)) {
             displayToast("Permission granted, debug logs wil be displayed after the next app launch")
         } else {
-            displayToast("Please grant a permission to see debug logs on overlay")
-            finish()
+            displayToast("Please grant permission to see debug logs on overlay")
         }
-
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        println("ON RESULTS:: " +grantResults.toString() )
-        println("ON RESULTS code:: " + requestCode )
-        println("ON RESULTS permissions:: " +Arrays.toString(permissions) )
         PermissionHelper.processResult(this, requestCode, permissions, grantResults)
     }
 
@@ -83,14 +77,9 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
      */
     fun checkAndRequestPermissions() {
         val deniedPermissions = PermissionHelper.checkPermissions(this)
-        if (!deniedPermissions.isEmpty()) {
-            displayToast("Denied Permissions: ${Arrays.toString(deniedPermissions)}")
-            println("DENIED:: " +Arrays.toString(deniedPermissions) )
-            PermissionHelper.requestPermissions(this, deniedPermissions)
-        }
-        //else
-            //enableOverlay()
+        PermissionHelper.requestPermissions(this, deniedPermissions)
 
+        enableOverlay()
     }
 
     override fun onResume() {
