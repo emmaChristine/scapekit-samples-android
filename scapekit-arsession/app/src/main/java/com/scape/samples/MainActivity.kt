@@ -11,11 +11,14 @@ import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
 import com.scape.scapekit.*
 import com.scape.scapekit.BuildConfig
+import com.scape.scapekit.helper.PermissionHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 /**
  * Activity that demonstrates the use of ScapeKit.
+ *
+ * The Activity requests permissions required by ScapeKit in case they were not granted previously.
  *
  * In order to display the AR preview we are grabbing an ArSession with `ArSession.withArFragment(sceneform_fragment)`.
  * On `localize_button` button press we attempt to retrieve the current geo-position(Position and Orientation) via `ScapeSession.getMeasurements`
@@ -34,7 +37,8 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        enableOverlay()
+        checkAndRequestPermissions()
+        //enableOverlay()
 
         setupCamera()
         setupGeo()
@@ -62,6 +66,30 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
             displayToast("Please grant a permission to see debug logs on overlay")
             finish()
         }
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        println("ON RESULTS:: " +grantResults.toString() )
+        println("ON RESULTS code:: " + requestCode )
+        println("ON RESULTS permissions:: " +Arrays.toString(permissions) )
+        PermissionHelper.processResult(this, requestCode, permissions, grantResults)
+    }
+
+    /**
+     * Check if permissions required by ScapeKit have been granted and prompt the user to grant the ones that haven't been granted yet.
+     */
+    fun checkAndRequestPermissions() {
+        val deniedPermissions = PermissionHelper.checkPermissions(this)
+        if (!deniedPermissions.isEmpty()) {
+            displayToast("Denied Permissions: ${Arrays.toString(deniedPermissions)}")
+            println("DENIED:: " +Arrays.toString(deniedPermissions) )
+            PermissionHelper.requestPermissions(this, deniedPermissions)
+        }
+        //else
+            //enableOverlay()
 
     }
 
