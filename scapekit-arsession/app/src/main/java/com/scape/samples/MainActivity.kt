@@ -5,12 +5,17 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.support.v4.app.ActivityCompat
+import android.support.v4.app.ActivityCompat.requestPermissions
 import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.widget.Toast
+import com.bosphere.filelogger.FL
 import com.google.ar.sceneform.ux.ArFragment
 import com.scape.scapekit.*
 import com.scape.scapekit.BuildConfig
+import com.scape.scapekit.helper.PermissionHelper
+import com.scape.scapekit.utils.ui.Console
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -69,26 +74,37 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         super.onResume()
 
         arSession?.startTracking()
+
+        startFetch()
     }
 
     override fun onPause() {
         super.onPause()
 
-        arSession?.stopTracking()
+       arSession?.stopTracking()
+
+        stopFetch()
     }
 
     override fun onDestroy() {
         arSession?.stopTracking()
 
+        stopFetch()
         super.onDestroy()
     }
 
     override fun onScapeSessionError(p0: ScapeSession?, p1: ScapeSessionState, p2: String) {
         Log.d(TAG, "Could not retrieve geo coordinates: $p2")
+
+        // log to file
+        FL.e("\nScapeSessionError state: $p1 message: $p2 \n")
     }
 
     override fun onDeviceMotionMeasurementsUpdated(p0: ScapeSession?, p1: MotionMeasurements?) {
         Log.d(TAG, "onDeviceMotionMeasurementsUpdated: $p1")
+
+        // log to file
+        FL.i("\nMotionMeasurements $p1\n")
     }
 
     override fun onScapeMeasurementsUpdated(p0: ScapeSession?, p1: ScapeMeasurements?) {
@@ -97,6 +113,9 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
 
     override fun onDeviceLocationMeasurementsUpdated(p0: ScapeSession?, details: LocationMeasurements?) {
         Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details?.coordinates}")
+
+        // log to file
+        FL.v("\nLocationMeasurements $details\n")
     }
 
     override fun onCameraTransformUpdated(p0: ScapeSession?, p1: ArrayList<Double>?) {
@@ -141,14 +160,14 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun getCurrentPositionAsync() {
-        scapeSession?.getMeasurements(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE, this)
+        scapeSession?.getMeasurements(GeoSourceType.RAWSENSORS, this)
     }
 
     /**
      * Example on how to start continuous geoposition fetching using Scape Vision Engine.
      */
     private fun startFetch() {
-        scapeSession?.startFetch(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE, this)
+        scapeSession?.startFetch(GeoSourceType.RAWSENSORS, this)
     }
 
     /**

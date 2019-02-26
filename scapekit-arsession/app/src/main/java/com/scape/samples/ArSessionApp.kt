@@ -1,9 +1,15 @@
 package com.scape.samples
 
 import android.app.Application
+import android.os.Environment
 import android.util.Log
+import com.bosphere.filelogger.FL
+import com.bosphere.filelogger.FLConfig
+import com.bosphere.filelogger.FLConst
 import com.scape.scapekit.Scape
 import com.scape.scapekit.ScapeClient
+import java.io.File
+
 
 /**
  * Basic Application class that demonstrates the initialisation of the ScapeClient.
@@ -29,6 +35,7 @@ class ArSessionApp : Application() {
         super.onCreate()
 
         Log.i(TAG, "onCreate: Application created")
+        initFileLogger()
 
         sharedInstance = this
 
@@ -44,5 +51,15 @@ class ArSessionApp : Application() {
         }, clientFailed = {
             Log.i(TAG, it)
         })
+    }
+
+    fun initFileLogger() {
+        FL.init(FLConfig.Builder(this)
+                .minLevel(FLConst.Level.V)
+                .logToFile(true)
+                .dir(File(Environment.getExternalStorageDirectory(), "file_logger_demo"))
+                .retentionPolicy(FLConst.DEFAULT_MAX_FILE_COUNT)
+                .build())
+        FL.setEnabled(true)
     }
 }
