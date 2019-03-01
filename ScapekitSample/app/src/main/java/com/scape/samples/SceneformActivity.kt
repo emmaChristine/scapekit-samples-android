@@ -12,15 +12,19 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import com.google.ar.core.Anchor
+import com.google.ar.core.Config
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
+import com.google.ar.core.Session
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import com.scape.pixscape.R
 import com.scape.scapekit.*
-import com.scape.scapekit.BuildConfig
+import com.scape.scapekit.helper.ARCoreAvailabilityHelper
+
 import java.util.ArrayList
 
 
@@ -36,6 +40,8 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
     private var arSession: ArSession? = null
     private var scapeSession: ScapeSession? = null
 
+    private var session: Session? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sceneform)
@@ -43,6 +49,8 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
         arFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment
 
         enableOverlay()
+
+        ARCoreAvailabilityHelper.requestInstallIfRequired(this)
 
         initModel()
 
@@ -106,7 +114,7 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
     }
 
     fun bindings() {
-       // arSession = ArSessionApp.sharedInstance.scapeClient.arSession?.withArFragment(arFragment)
+        arSession = ArSessionApp.sharedInstance.scapeClient.arSession?.withArFragment(arFragment)
 
         arSession?.isDebugMode = false
         arSession?.isPlaneDetection = true
@@ -114,7 +122,18 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
         arSession?.arSessionObserver = this
 
         scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
-        //scapeSession.setARSession()
+
+        session = Session(this)
+        println("CONFIG:: " + session!!.config.toString())  //  S L 4.0.10 AArch641
+
+        // IMPORTANT!!!  ArSceneView requires the `LATEST_CAMERA_IMAGE` non-blocking update mode.
+        val config = Config(session)
+        config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+        session!!.configure(config)
+
+        contentScene
+
+//        scapeSession.setARSession
     }
 
     fun initModel() {

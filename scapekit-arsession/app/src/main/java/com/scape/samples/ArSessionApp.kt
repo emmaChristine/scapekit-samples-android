@@ -6,6 +6,7 @@ import android.util.Log
 import com.bosphere.filelogger.FL
 import com.bosphere.filelogger.FLConfig
 import com.bosphere.filelogger.FLConst
+import com.mapbox.mapboxsdk.Mapbox
 import com.scape.scapekit.Scape
 import com.scape.scapekit.ScapeClient
 import java.io.File
@@ -36,9 +37,14 @@ class ArSessionApp : Application() {
 
         Log.i(TAG, "onCreate: Application created")
         initFileLogger()
+        //initMapbox()
+        initGMaps()
+        initScapekit()
 
         sharedInstance = this
+    }
 
+    fun initScapekit() {
         scapeClient = Scape.scapeClientBuilder
                 .withContext(applicationContext)
                 .withDebugSupport(true)
@@ -61,5 +67,13 @@ class ArSessionApp : Application() {
                 .retentionPolicy(FLConst.DEFAULT_MAX_FILE_COUNT)
                 .build())
         FL.setEnabled(true)
+    }
+
+    fun initGMaps() {
+
+    }
+
+    fun initMapbox() {
+        Mapbox.getInstance(applicationContext, BuildConfig.MAPBOX_API_KEY)
     }
 }

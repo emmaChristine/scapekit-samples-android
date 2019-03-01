@@ -5,19 +5,22 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.ActivityCompat.requestPermissions
 import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.widget.Toast
 import com.bosphere.filelogger.FL
 import com.google.ar.sceneform.ux.ArFragment
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.scape.scapekit.*
 import com.scape.scapekit.BuildConfig
-import com.scape.scapekit.helper.PermissionHelper
-import com.scape.scapekit.utils.ui.Console
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+
 
 /**
  * Activity that demonstrates the use of ScapeKit.
@@ -27,17 +30,23 @@ import java.util.*
  * with `GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE` flag to ensure a very precise localization.
  *
  */
-class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver {
+class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver, OnMapReadyCallback {
 
     val TAG = MainActivity::class.java.simpleName
 
     private val REQUEST_OVERLAY = 11
     private var arSession: ArSession? = null
     private var scapeSession: ScapeSession? = null
+    private var mapView: MapView? = null
+    private lateinit var mapBox: MapboxMap
+    private var lastLat = 0.0
+    private var lastLong = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setupMap(savedInstanceState)
 
         enableOverlay()
 
@@ -45,6 +54,25 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         setupGeo()
 
         bindings()
+    }
+
+    override fun onStart() {
+        super.onStart()
+    }
+
+    fun setupMap(savedInstanceState: Bundle?) {
+        val mapFragment: SupportMapFragment? =
+                supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+
+        mapFragment?.getMapAsync(this)
+    }
+
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        googleMap ?: return
+        with(googleMap) {
+            moveCamera(CameraUpdateFactory.newLatLngZoom(SYDNEY, ZOOM_LEVEL))
+            addMarker(MarkerOptions().position(SYDNEY))
+        }
     }
 
     // Allow debug logs can be displayed on an overlay view
@@ -73,23 +101,24 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     override fun onResume() {
         super.onResume()
 
+        mapView?.onResume()
         arSession?.startTracking()
-
         startFetch()
     }
 
     override fun onPause() {
         super.onPause()
 
-       arSession?.stopTracking()
-
+        mapView?.onPause()
+        arSession?.stopTracking()
         stopFetch()
     }
 
     override fun onDestroy() {
+        mapView?.onDestroy()
         arSession?.stopTracking()
-
         stopFetch()
+
         super.onDestroy()
     }
 
@@ -109,13 +138,21 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
 
     override fun onScapeMeasurementsUpdated(p0: ScapeSession?, p1: ScapeMeasurements?) {
         Log.d(TAG, "onScapeMeasurementsUpdated: $p1")
+
+        // log to file
+        FL.i("\nonScapeMeasurementsUpdated $p1\n")
     }
 
     override fun onDeviceLocationMeasurementsUpdated(p0: ScapeSession?, details: LocationMeasurements?) {
         Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details?.coordinates}")
 
+        lastLat = details?.coordinates?.latitude!!
+        lastLong = details?.coordinates?.longitude!!
+
         // log to file
         FL.v("\nLocationMeasurements $details\n")
+
+        // Update Mapbox
     }
 
     override fun onCameraTransformUpdated(p0: ScapeSession?, p1: ArrayList<Double>?) {
@@ -160,7 +197,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun getCurrentPositionAsync() {
-        scapeSession?.getMeasurements(GeoSourceType.RAWSENSORS, this)
+        scapeSession?.getMeasurements(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE, this)
     }
 
     /**
