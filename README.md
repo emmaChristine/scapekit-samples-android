@@ -1,4 +1,4 @@
-# ScapeKit Samples for Android 
+# ScapeKit 0.3.0 Samples for Android 
 
 * Clone the repository
 * Add `gradle.properties` file at the same level as your `build.gradle` project file 
