@@ -32,6 +32,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     private val REQUEST_OVERLAY = 11
     private var arSession: ArSession? = null
     private var scapeSession: ScapeSession? = null
+    private lateinit var scapeClient: ScapeClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,17 +86,20 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     override fun onResume() {
         super.onResume()
 
-        arSession?.startTracking()
+        if (!scapeClient.isStarted)
+            scapeClient.start()
     }
 
     override fun onPause() {
         super.onPause()
 
-        arSession?.stopTracking()
+        if (scapeClient.isStarted)
+            scapeClient.stop()
     }
 
     override fun onDestroy() {
-        arSession?.stopTracking()
+        if (scapeClient.isStarted)
+            scapeClient.terminate()
 
         super.onDestroy()
     }
@@ -140,7 +144,9 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun setupCamera() {
-        arSession = ArSessionApp.sharedInstance.scapeClient.arSession?.withArFragment(sceneform_fragment as ArFragment)
+        scapeClient = ArSessionApp.sharedInstance.scapeClient
+
+        arSession = scapeClient.arSession?.withArFragment(sceneform_fragment as ArFragment)
         arSession?.isDebugMode = false
         arSession?.isPlaneDetection = true
         arSession?.isLightEstimation = true
@@ -148,7 +154,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun setupGeo() {
-        scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
+        scapeSession = scapeClient.scapeSession
     }
 
     private fun bindings() {

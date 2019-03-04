@@ -37,7 +37,7 @@ dependencies {
         }
     }
     // SCAPEKIT
-    implementation 'com.scape:scapekit:0.3.0@aar'
+    implementation 'com.scape:scapekit:0.3.1@aar'
     // KOTLIN
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     // UI
@@ -46,4 +46,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:16.0.0'
     // SceneForm
     implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.6.0'
+    //implementation project(':scapekit-0.3.1')
 }
