@@ -86,15 +86,13 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     override fun onResume() {
         super.onResume()
 
-        if (!scapeClient.isStarted)
-            scapeClient.start()
+        arSession?.startTracking()
     }
 
     override fun onPause() {
         super.onPause()
 
-        if (scapeClient.isStarted)
-            scapeClient.stop()
+        arSession?.stopTracking()
     }
 
     override fun onDestroy() {
