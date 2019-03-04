@@ -10,7 +10,6 @@ import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
 import com.scape.scapekit.*
-import com.scape.scapekit.BuildConfig
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -29,6 +28,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     private val REQUEST_OVERLAY = 11
     private var arSession: ArSession? = null
     private var scapeSession: ScapeSession? = null
+    private lateinit var scapeClient: ScapeClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +78,8 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     override fun onDestroy() {
-        arSession?.stopTracking()
+        if (scapeClient.isStarted)
+            scapeClient.terminate()
 
         super.onDestroy()
     }
@@ -96,7 +97,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     override fun onDeviceLocationMeasurementsUpdated(p0: ScapeSession?, details: LocationMeasurements?) {
-        Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details?.coordinates}")
+        Log.d(TAG, "retrieving GPS LocationCoordinates: ${details?.coordinates}")
     }
 
     override fun onCameraTransformUpdated(p0: ScapeSession?, p1: ArrayList<Double>?) {
@@ -123,7 +124,9 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun setupCamera() {
-        arSession = ArSessionApp.sharedInstance.scapeClient.arSession?.withArFragment(sceneform_fragment as ArFragment)
+        scapeClient = ArSessionApp.sharedInstance.scapeClient
+
+        arSession = scapeClient.arSession?.withArFragment(sceneform_fragment as ArFragment)
         arSession?.isDebugMode = false
         arSession?.isPlaneDetection = true
         arSession?.isLightEstimation = true
@@ -131,7 +134,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun setupGeo() {
-        scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
+        scapeSession = scapeClient.scapeSession
     }
 
     private fun bindings() {
