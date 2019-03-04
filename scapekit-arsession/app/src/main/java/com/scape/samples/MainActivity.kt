@@ -144,7 +144,6 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     private fun getCurrentPositionAsync() {
-
         scapeSession?.getMeasurements(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE, this)
     }
 
@@ -152,7 +151,6 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
      * Example on how to start continuous geoposition fetching using Scape Vision Engine.
      */
     private fun startFetch() {
-
         scapeSession?.startFetch(GeoSourceType.RAWSENSORSANDSCAPEVISIONENGINE, this)
     }
 
@@ -160,7 +158,6 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
      * Example on how to stop continuous geoposition fetching.
      */
     private fun stopFetch() {
-
         scapeSession?.stopFetch()
     }
 
