@@ -10,7 +10,6 @@ import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
 import com.scape.scapekit.*
-import com.scape.scapekit.BuildConfig
 import com.scape.scapekit.helper.PermissionHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -51,7 +50,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:${BuildConfig.APPLICATION_ID}"))
+                    Uri.parse("package:$packageName"))
             startActivityForResult(intent, REQUEST_OVERLAY)
         }
     }
