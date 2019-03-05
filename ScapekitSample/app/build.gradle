@@ -48,7 +48,7 @@ dependencies {
     // Provides ArFragment, and other Sceneform UX resources
     implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.6.0'
     // ScapeKit
-     implementation 'com.scape:scapekit:0.3.0@aar'
+     implementation 'com.scape:scapekit:0.3.2@aar'
 }
 
 

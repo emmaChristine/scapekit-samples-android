@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
+import com.scape.scapekit.helper.PermissionHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -61,6 +62,12 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
             finish()
         }
 
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        PermissionHelper.processResult(this, requestCode, permissions, grantResults)
     }
 
     override fun onResume() {

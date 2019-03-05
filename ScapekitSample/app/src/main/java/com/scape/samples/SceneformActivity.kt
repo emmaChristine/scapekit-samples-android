@@ -11,23 +11,22 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
-import com.google.ar.core.Anchor
-import com.google.ar.core.HitResult
-import com.google.ar.core.Plane
+import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.FrameTime
+import com.google.ar.sceneform.Scene
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import com.scape.scapekit.*
-import com.scape.scapekit.BuildConfig
 import java.util.*
 
 
 /**
  * Example activity that already uses Sceneform UX and allows rendering of objects, and then integrates with ScapeKit.
  */
-class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionObserver {
+class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionObserver, Scene.OnUpdateListener {
 
     val TAG = SceneformActivity::class.java.simpleName
 
@@ -35,32 +34,30 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
     lateinit var arFragment: ArFragment
     private var arSession: ArSession? = null
     private var scapeSession: ScapeSession? = null
+    lateinit private var frame: Frame
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sceneform)
 
         arFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment
+        arFragment.arSceneView.scene.addOnUpdateListener(this)
 
         enableOverlay()
 
         initModel()
-
-        bindings()
     }
 
     override fun onResume() {
         super.onResume()
 
         arSession?.startTracking()
-        startFetch()
     }
 
     override fun onPause() {
         super.onPause()
 
         arSession?.stopTracking()
-        stopFetch()
     }
 
     override fun onDestroy() {
@@ -69,12 +66,26 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
         super.onDestroy()
     }
 
+    override fun onUpdate(frameTime: FrameTime?) {
+        frame = arFragment.arSceneView.arFrame
+
+        // If there is no frame or ARCore is not tracking yet, just return.
+        if (frame == null || frame.camera.trackingState != TrackingState.TRACKING) {
+            return
+        }
+
+        bindings()
+
+
+
+    }
+
     // Allow debug logs can be displayed on an overlay view
     fun enableOverlay() {
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:${BuildConfig.APPLICATION_ID}"))
+                Uri.parse("package:$packageName"))
             startActivityForResult(intent, REQUEST_OVERLAY)
         }
     }
@@ -107,12 +118,17 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
 
     fun bindings() {
         arSession = ArSessionApp.sharedInstance.scapeClient.arSession?.withArFragment(arFragment)
+
+        scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
+        scapeSession?.setARSession(arFragment.arSceneView.session)
+
+
+        //arSession = ArSessionApp.sharedInstance.scapeClient.arSession?.withArFragment(arFragment)
         arSession?.isDebugMode = false
         arSession?.isPlaneDetection = true
         arSession?.isLightEstimation = true
         arSession?.arSessionObserver = this
 
-        scapeSession = ArSessionApp.sharedInstance.scapeClient.scapeSession
     }
 
     fun initModel() {
@@ -126,6 +142,7 @@ class SceneformActivity : AppCompatActivity(), ScapeSessionObserver, ArSessionOb
 
     fun addObject(model: Uri) {
         val frame = arFragment.arSceneView.arFrame
+
 
         val pt = getScreenCenter()
         val hits: List<HitResult>
