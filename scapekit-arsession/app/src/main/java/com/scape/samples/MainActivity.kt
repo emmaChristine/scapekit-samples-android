@@ -114,7 +114,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
     }
 
     override fun onDeviceLocationMeasurementsUpdated(p0: ScapeSession?, details: LocationMeasurements?) {
-        Log.d(TAG, "Retrieving GPS LocationCoordinates: ${details?.coordinates}")
+        Log.d(TAG, "retrieving GPS LocationCoordinates: ${details?.coordinates}")
     }
 
     override fun onCameraTransformUpdated(p0: ScapeSession?, p1: ArrayList<Double>?) {
