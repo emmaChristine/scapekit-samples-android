@@ -10,11 +10,14 @@ import android.util.Log
 import android.widget.Toast
 import com.google.ar.sceneform.ux.ArFragment
 import com.scape.scapekit.*
+import com.scape.scapekit.helper.PermissionHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 /**
  * Activity that demonstrates the use of ScapeKit.
+ *
+ * The Activity requests permissions required by ScapeKit in case they were not granted previously.
  *
  * In order to display the AR preview we are grabbing an ArSession with `ArSession.withArFragment(sceneform_fragment)`.
  * On `localize_button` button press we attempt to retrieve the current geo-position(Position and Orientation) via `ScapeSession.getMeasurements`
@@ -34,7 +37,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        enableOverlay()
+        checkAndRequestPermissions()
 
         setupCamera()
         setupGeo()
@@ -47,7 +50,7 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:${BuildConfig.APPLICATION_ID}"))
+                    Uri.parse("package:$packageName"))
             startActivityForResult(intent, REQUEST_OVERLAY)
         }
     }
@@ -59,10 +62,24 @@ class MainActivity : FragmentActivity(), ScapeSessionObserver, ArSessionObserver
                 && Settings.canDrawOverlays(this)) {
             displayToast("Permission granted, debug logs wil be displayed after the next app launch")
         } else {
-            displayToast("Please grant a permission to see debug logs on overlay")
-            finish()
+            displayToast("Please grant permission to see debug logs on overlay")
         }
+    }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        PermissionHelper.processResult(this, requestCode, permissions, grantResults)
+    }
+
+    /**
+     * Check if permissions required by ScapeKit have been granted and prompt the user to grant the ones that haven't been granted yet.
+     */
+    fun checkAndRequestPermissions() {
+        val deniedPermissions = PermissionHelper.checkPermissions(this)
+        PermissionHelper.requestPermissions(this, deniedPermissions)
+
+        enableOverlay()
     }
 
     override fun onResume() {
