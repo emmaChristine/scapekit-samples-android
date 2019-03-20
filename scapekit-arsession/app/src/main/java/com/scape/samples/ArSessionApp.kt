@@ -13,7 +13,7 @@ import com.scape.scapekit.ScapeClient
 class ArSessionApp : Application() {
 
     companion object {
-        val TAG = ArSessionApp::class.java.simpleName
+        private const val TAG = "ScapeArSessionApp"
 
         private var mSharedInstance: ArSessionApp? = null
         var sharedInstance: ArSessionApp
@@ -35,14 +35,8 @@ class ArSessionApp : Application() {
         scapeClient = Scape.scapeClientBuilder
                 .withContext(applicationContext)
                 .withDebugSupport(true)
-                .withApiKey(BuildConfig.SCAPEKIT_API_KEY)
-                .withArSupport(true)
+                .withApiKey("ZH8wQNckWg8Tf1VHUjn8QaTbdEgWs1mS2iMaSfb8")
+                .withXrSupport(true)
                 .build()
-
-        scapeClient.start(clientStarted = {
-            Log.i(TAG, "ScapeClient started")
-        }, clientFailed = {
-            Log.i(TAG, it)
-        })
     }
 }
